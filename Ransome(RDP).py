@@ -75,7 +75,7 @@ class Ransomware:
         exit_item = MenuItem("Exit", exit)
 
         # Create menu
-        menu = Menu([encrypt_item, popup_item, decrypt_item, exit_item])
+        menu = MenuItem([encrypt_item, popup_item, decrypt_item, exit_item])
         menu.show()
 
 ransomware = Ransomware()
